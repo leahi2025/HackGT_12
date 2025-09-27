@@ -14,7 +14,7 @@ app.use(cors({
   credentials: true, 
 }));
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+const supabase_base = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 app.listen(3000, () => {
   console.log(`Server running on port ${process.env.PORT || 3000}`);
@@ -38,7 +38,7 @@ app.post("/signup", async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase_base.auth.signUp({
       email,
       password,
       options: {
@@ -63,7 +63,7 @@ app.post("/login", async (req, res) => {
     return res.status(400).json({ error: "Email and password required" });
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase_base.auth.signInWithPassword({
       email,
       password,
     });
@@ -331,7 +331,7 @@ app.delete("/appointments/:id", async (req, res) => {
   }
 });
 
-app.patch("/patient/:id", async (req, res) => {
+app.patch("/patients/:id", async (req, res) => {
   const { id } = req.params;
   const updates = req.body; // only the fields to update
 

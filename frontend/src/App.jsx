@@ -8,6 +8,8 @@ import PatientTrends from './components/PatientTrends'
 function App() {
   const [currentPatient, setCurrentPatient] = useState({ id: 1, name: 'John Doe' })
   const [transcript, setTranscript] = useState('')
+  const [dialogueTranscript, setDialogueTranscript] = useState('')
+  const [isFormattingDialogue, setIsFormattingDialogue] = useState(false)
   const [structuredData, setStructuredData] = useState({})
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [isParsing, setIsParsing] = useState(false)
@@ -31,11 +33,13 @@ function App() {
   ])
 
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
   const handleAudioRecorded = async (audioBlob) => {
     setIsTranscribing(true)
     const formData = new FormData();
     formData.append("file", audioBlob, "recording.webm");
     formData.append("model", "whisper-1");
+
     const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
       headers: {
@@ -99,6 +103,38 @@ Transcript:
     extracted = {};
   }
   setStructuredData(extracted);
+
+  setIsFormattingDialogue(true);
+  const dialoguePrompt = `
+Format the following medical transcript as a dialogue between a Patient and a Nurse. The patient's name is ${currentPatient.name}.
+Label each line with "${currentPatient.name}:" or "Nurse:" as appropriate. If the speaker is unclear, make your best guess.
+
+Transcript:
+"${data.text}"`.trim();
+  const dialogueRes = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: dialoguePrompt }],
+      max_tokens: 300,
+      temperature: 0,
+    }),
+  });
+
+  const dialogueData = await dialogueRes.json(); // 15. Parse the GPT response for dialogue
+  let formattedDialogue = '';
+  try {
+    formattedDialogue = dialogueData.choices[0].message.content.trim(); // 16. Extract the dialogue text
+  } catch (e) {
+    formattedDialogue = data.text; // 17. Fallback to original transcript if error
+  }
+  setDialogueTranscript(formattedDialogue); // 18. Save the dialogue to state
+  console.log(formattedDialogue);
+  setIsFormattingDialogue(false);
 }
 
   const handleSaveVisit = () => {
