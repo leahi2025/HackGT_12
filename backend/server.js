@@ -88,18 +88,17 @@ app.get("/patients", async (req, res) => {
   res.json(data);
 });
 
-app.get("/patients/profile", async (req, res) => {
+app.get("/patients/:id", async (req, res) => {
 
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return res.status(401).json({ error: "Invalid user" });
+  const { id } = req.params;
 
   const { data: patient, error: patientError } = await supabase
     .from("patients")
     .select("*")
-    .eq("id", user.id)
+    .eq("id", id)
     .single();
 
   if (patientError) return res.status(400).json({ error: patientError.message });
@@ -107,7 +106,6 @@ app.get("/patients/profile", async (req, res) => {
 
   res.json(patient);
 });
-
 
 app.get("/hcp", async (req, res) => {
 
@@ -120,10 +118,12 @@ app.get("/hcp", async (req, res) => {
   res.json(data);
 });
 
-app.get("/hcp/profile", async (req, res) => {
+app.get("/hcp/:id", async (req, res) => {
 
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  const { id } = req.params;
 
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return res.status(401).json({ error: "Invalid user" });
@@ -131,25 +131,119 @@ app.get("/hcp/profile", async (req, res) => {
   const { data: hcp, error: hcpError } = await supabase
     .from("hcp")
     .select("*")
-    .eq("id", user.id)
+    .eq("id", id)
     .single();
 
   if (hcpError) return res.status(400).json({ error: hcpError.message });
-  if (!hcp) return res.status(404).json({ error: "Patient profile not found" });
+  if (!hcp) return res.status(404).json({ error: "Healthcare professional profile not found" });
 
   res.json(hcp);
 });
 
-app.get("/records", async (req, res) => {
+app.get("/nurse-records", async (req, res) => {
 
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
-  const { data, error } = await supabase.from("records").select("*").order('created_at', { ascending: false });
+  const { data, error } = await supabase.from("nurse_records").select("*").order('created_at', { ascending: false });
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
 
+});
+
+app.post("/nurse-records", async (req, res) => {
+
+  try {
+    const { data, error } = await supabase
+      .from("nurse_records")
+      .insert([req.body])  // whatever fields are missing → NULL
+      .select()
+      .single();
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.patch("/nurse-records/:id", async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body; // only the fields to update
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+
+    const { data, error: updateError } = await supabase
+      .from("nurse_records")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/doctor-records", async (req, res) => {
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  const { data, error } = await supabase.from("doctor_records").select("*").order('created_at', { ascending: false });
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+
+});
+
+app.post("/doctor-records", async (req, res) => {
+
+  try {
+    const { data, error } = await supabase
+      .from("doctor_records")
+      .insert([req.body])  // whatever fields are missing → NULL
+      .select()
+      .single();
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.patch("/doctor-records/:id", async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body; // only the fields to update
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+
+    const { data, error: updateError } = await supabase
+      .from("doctor_records")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 app.get("/upcoming-appointments", async (req, res) => {
@@ -172,4 +266,115 @@ app.get("/previous-appointments", async (req, res) => {
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
+});
+
+app.post("/appointments", async (req, res) => {
+  const { patient, hcp, date, reason } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from("appointments")
+      .insert([
+        { patient, hcp, date, reason, occurred: false }
+      ])
+      .select()
+      .single(); // return the created row
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.patch("/appointments/:id", async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body; // only the fields to update
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+
+    const { data, error: updateError } = await supabase
+      .from("appointments")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.delete("/appointments/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from("appointments")
+      .delete()
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    res.json({ message: "Appointment canceled", appointment: data });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.patch("/patient/:id", async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body; // only the fields to update
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+
+    const { data, error: updateError } = await supabase
+      .from("patients")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.patch("/hcp/:id", async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body; // only the fields to update
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+
+    const { data, error: updateError } = await supabase
+      .from("hcp")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
