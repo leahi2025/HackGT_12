@@ -1,34 +1,98 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import VoiceRecorder from './components/VoiceRecorder'
+import TranscriptEditor from './components/TranscriptEditor'
+import PatientDashboard from './components/PatientDashboard'
+import PatientTrends from './components/PatientTrends'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentPatient, setCurrentPatient] = useState({ id: 1, name: 'John Doe' })
+  const [transcript, setTranscript] = useState('')
+  const [structuredData, setStructuredData] = useState({})
+  const [isRecording, setIsRecording] = useState(false)
+  const [visits, setVisits] = useState([
+    {
+      id: 1,
+      patientId: 1,
+      date: '2025-09-20',
+      transcript: 'Patient reports blood pressure of 120/80, weight 165 pounds. Feeling well overall.',
+      structuredData: { bloodPressure: '120/80', weight: 165 }
+    },
+    {
+      id: 2,
+      patientId: 1,
+      date: '2025-09-15',
+      transcript: 'Blood pressure reading 118/75, weight 163 pounds.',
+      structuredData: { bloodPressure: '118/75', weight: 163 }
+    }
+  ])
+
+  const handleAudioRecorded = async (audioBlob) => {
+    // Mock API call to backend
+    console.log('Sending audio to backend...', audioBlob)
+    
+    // Simulate API response
+    setTimeout(() => {
+      const mockTranscript = 'Patient reports blood pressure of 125/85, weight 167 pounds. Patient mentions mild headache.'
+      const mockStructuredData = {
+        bloodPressure: '125/85',
+        weight: 167,
+        symptoms: ['headache']
+      }
+      
+      setTranscript(mockTranscript)
+      setStructuredData(mockStructuredData)
+    }, 2000)
+  }
+
+  const handleSaveVisit = () => {
+    const newVisit = {
+      id: visits.length + 1,
+      patientId: currentPatient.id,
+      date: new Date().toISOString().split('T')[0],
+      transcript: transcript,
+      structuredData: structuredData
+    }
+    
+    setVisits([newVisit, ...visits])
+    setTranscript('')
+    setStructuredData({})
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="medical-app">
+      <header className="app-header">
+        <h1>Medical Voice Transcription System</h1>
+        <div className="patient-info">
+          <strong>Current Patient: {currentPatient.name}</strong>
+        </div>
+      </header>
+      
+      <div className="app-content">
+        <div className="recording-section">
+          <VoiceRecorder 
+            onAudioRecorded={handleAudioRecorded}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+          />
+        </div>
+        
+        <div className="transcript-section">
+          <TranscriptEditor 
+            transcript={transcript}
+            setTranscript={setTranscript}
+            structuredData={structuredData}
+            setStructuredData={setStructuredData}
+            onSave={handleSaveVisit}
+          />
+        </div>
+        
+        <div className="dashboard-section">
+          <PatientDashboard visits={visits.filter(v => v.patientId === currentPatient.id)} />
+          <PatientTrends visits={visits.filter(v => v.patientId === currentPatient.id)} />
+        </div>
       </div>
-      <h1>Vite + React lol aditya was here</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more lmfaoo 
-      </p>
-    </>
+    </div>
   )
 }
 
