@@ -26,8 +26,10 @@ function App() {
       structuredData: { bloodPressure: '118/75', weight: 163 }
     }
   ])
+
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const handleAudioRecorded = async (audioBlob) => {
+    console.log("API Key:", apiKey);
     const formData = new FormData();
     formData.append("file", audioBlob, "recording.webm");
     formData.append("model", "whisper-1");
@@ -41,17 +43,51 @@ function App() {
 
     const data = await res.json();
     setTranscript(data.text);
-    
-    // Simulate API response
-    setTimeout(() => {
-      const mockStructuredData = {
-        bloodPressure: '125/85',
-        weight: 167,
-        symptoms: ['headache']
-      }
-      setStructuredData(mockStructuredData)
-    }, 2000)
-  }
+
+    const prompt = `
+Extract the following metrics from this medical transcript:
+- Blood Pressure
+- Heart Rate
+- Weight
+- Notes (any other relevant info)
+
+Return as JSON with keys: bloodPressure, heartRate, weight, notes.
+
+Transcript:
+"${data.text}"
+  `.trim();
+
+  const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 150,
+      temperature: 0,
+    }),
+  });
+
+  const gptData = await gptRes.json();
+
+  setTimeout(() => {
+    let extracted = {};
+    try {
+      // 8. Try to parse the JSON returned by GPT
+      const text = gptData.choices[0].message.content;
+      console.log("GPT raw response:", text);
+      extracted = JSON.parse(text);
+    } catch (e) {
+      // 9. If parsing fails, set to empty object
+      console.error("Failed to parse GPT response:", gptData);
+      extracted = {};
+    }
+    setStructuredData(extracted);
+  }, 2000); // 2 second artificial delay
+}
 
   const handleSaveVisit = () => {
     const newVisit = {
