@@ -9,6 +9,7 @@ function App() {
   const [currentPatient, setCurrentPatient] = useState({ id: 1, name: 'John Doe' })
   const [transcript, setTranscript] = useState('')
   const [structuredData, setStructuredData] = useState({})
+  const [isTranscribing, setIsTranscribing] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [visits, setVisits] = useState([
     {
@@ -28,6 +29,7 @@ function App() {
   ])
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const handleAudioRecorded = async (audioBlob) => {
+    setIsTranscribing(true)
     const formData = new FormData();
     formData.append("file", audioBlob, "recording.webm");
     formData.append("model", "whisper-1");
@@ -41,7 +43,7 @@ function App() {
 
     const data = await res.json();
     setTranscript(data.text);
-    
+    setIsTranscribing(false)
     // Simulate API response
     setTimeout(() => {
       const mockStructuredData = {
@@ -92,6 +94,7 @@ function App() {
             structuredData={structuredData}
             setStructuredData={setStructuredData}
             onSave={handleSaveVisit}
+            isTranscribing={isTranscribing}
           />
         </div>
         

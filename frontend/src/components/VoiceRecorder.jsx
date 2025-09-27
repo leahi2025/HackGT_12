@@ -86,10 +86,6 @@ const VoiceRecorder = ({ onAudioRecorded, isRecording, setIsRecording }) => {
           <audio controls src={audioURL} />
         </div>
       )}
-
-      <div className="recording-instructions">
-        <p>Click "Start Recording" and speak clearly. Mention patient vitals like blood pressure, weight, symptoms, etc.</p>
-      </div>
     </div>
   )
 }

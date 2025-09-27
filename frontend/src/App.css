@@ -167,6 +167,12 @@
   font-size: 1.5rem;
 }
 
+.transcript-editor p {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
 .transcript-textarea {
   width: 100%;
   min-height: 120px;
