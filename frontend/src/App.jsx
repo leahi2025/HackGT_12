@@ -26,21 +26,29 @@ function App() {
       structuredData: { bloodPressure: '118/75', weight: 163 }
     }
   ])
-
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const handleAudioRecorded = async (audioBlob) => {
-    // Mock API call to backend
-    console.log('Sending audio to backend...', audioBlob)
+    const formData = new FormData();
+    formData.append("file", audioBlob, "recording.webm");
+    formData.append("model", "whisper-1");
+    const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`, // set this in .env
+      },
+      body: formData
+    });
+
+    const data = await res.json();
+    setTranscript(data.text);
     
     // Simulate API response
     setTimeout(() => {
-      const mockTranscript = 'Patient reports blood pressure of 125/85, weight 167 pounds. Patient mentions mild headache.'
       const mockStructuredData = {
         bloodPressure: '125/85',
         weight: 167,
         symptoms: ['headache']
       }
-      
-      setTranscript(mockTranscript)
       setStructuredData(mockStructuredData)
     }, 2000)
   }
