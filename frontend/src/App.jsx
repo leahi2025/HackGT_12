@@ -10,6 +10,7 @@ function App() {
   const [transcript, setTranscript] = useState('')
   const [structuredData, setStructuredData] = useState({})
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [isParsing, setIsParsing] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [visits, setVisits] = useState([
     {
@@ -45,6 +46,7 @@ function App() {
     setTranscript(data.text);
     setIsTranscribing(false)
     // Simulate API response
+    setIsParsing(true)
     setTimeout(() => {
       const mockStructuredData = {
         bloodPressure: '125/85',
@@ -52,6 +54,7 @@ function App() {
         symptoms: ['headache']
       }
       setStructuredData(mockStructuredData)
+      setIsParsing(false)
     }, 2000)
   }
 
@@ -95,6 +98,7 @@ function App() {
             setStructuredData={setStructuredData}
             onSave={handleSaveVisit}
             isTranscribing={isTranscribing}
+            isParsing={isParsing}
           />
         </div>
         
