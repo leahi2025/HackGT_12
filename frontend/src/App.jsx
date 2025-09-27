@@ -52,9 +52,10 @@ Extract the following metrics from this medical transcript:
 - Blood Pressure
 - Heart Rate
 - Weight
-- Notes (any other relevant info)
+- Temperature
+- Symptoms (as an array of strings)
 
-Return as JSON with keys: bloodPressure, heartRate, weight, notes.
+Return as JSON with keys: bloodPressure (using a / instead of "over"), heartRate, weight, temperature, symptoms (array of strings).
 
 Transcript:
 "${data.text}"`.trim();
