@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStructuredData, onSave }) => {
+const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStructuredData, onSave, isTranscribing, isParsing }) => {
   const [editableTranscript, setEditableTranscript] = useState('')
   const [editableStructuredData, setEditableStructuredData] = useState({})
 
@@ -34,8 +34,10 @@ const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStruct
 
   return (
     <div className="transcript-editor">
-      <h2>Transcript & Patient Data</h2>
-      
+      <h2>Transcript & Patient Data</h2>   
+      {isTranscribing && (
+        <p>Transcribing...</p>
+      )}  
       <div className="transcript-section">
         <h3>Transcript</h3>
         <textarea
@@ -46,7 +48,9 @@ const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStruct
           className="transcript-textarea"
         />
       </div>
-
+      {isParsing && (
+        <p>Parsing transcript...</p>
+      )} 
       <div className="structured-data-section">
         <h3>Extracted Patient Data</h3>
         
