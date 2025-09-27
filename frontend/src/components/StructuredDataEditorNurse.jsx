@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const StructuredDataEditor = ({ structuredData, setStructuredData, isParsing }) => {
+const StructuredDataEditorNurse = ({ structuredData, setStructuredData, isParsing }) => {
   const [editableStructuredData, setEditableStructuredData] = useState({})
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const StructuredDataEditor = ({ structuredData, setStructuredData, isParsing }) 
         <p>Parsing transcript...</p>
       )} 
       <div className="structured-data-section">
-        <h3>Extracted Patient Data</h3>
+        <h3>Extracted Patient Vitals</h3>
         
         <div className="data-fields">
           <div className="field-group">
@@ -81,4 +81,4 @@ const StructuredDataEditor = ({ structuredData, setStructuredData, isParsing }) 
   )
 }
 
-export default StructuredDataEditor
+export default StructuredDataEditorNurse

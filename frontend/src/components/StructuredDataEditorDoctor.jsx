@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const StructuredDataEditor = ({ structuredData, setStructuredData, isParsing }) => {
+const StructuredDataEditorDoctor = ({ structuredData, setStructuredData, isParsing }) => {
   const [editableStructuredData, setEditableStructuredData] = useState({})
 
   useEffect(() => {
@@ -17,64 +17,59 @@ const StructuredDataEditor = ({ structuredData, setStructuredData, isParsing }) 
     <>
       {isParsing && (
         <p>Parsing transcript...</p>
-      )} 
+      )}
       <div className="structured-data-section">
         <h3>Extracted Patient Data</h3>
-        
+
         <div className="data-fields">
           <div className="field-group">
-            <label htmlFor="bloodPressure">Blood Pressure(doctor):</label>
-            <input
-              id="bloodPressure"
-              type="text"
-              value={editableStructuredData.bloodPressure || ''}
-              onChange={(e) => handleStructuredDataChange('bloodPressure', e.target.value)}
-              placeholder="e.g., 120/80"
+            <label htmlFor="chiefComplaint">Chief Complaint</label>
+            <textarea
+              id="chiefComplaint"
+              rows={4}
+              value={editableStructuredData.chiefComplaint || ''}
+              onChange={(e) => handleStructuredDataChange('chiefComplaint', e.target.value)}
+              placeholder="Chief Complaint..."
             />
           </div>
-
           <div className="field-group">
-            <label htmlFor="weight">Weight (lbs):</label>
-            <input
-              id="weight"
-              type="number"
-              value={editableStructuredData.weight || ''}
-              onChange={(e) => handleStructuredDataChange('weight', parseFloat(e.target.value) || '')}
-              placeholder="e.g., 165"
+            <label htmlFor="presentIllness">Present Illness History</label>
+            <textarea
+              id="presentIllness"
+              rows={4}
+              value={editableStructuredData.presentIllness || ''}
+              onChange={(e) => handleStructuredDataChange('presentIllness', e.target.value)}
+              placeholder="Present Illness History..."
             />
           </div>
-
           <div className="field-group">
-            <label htmlFor="heartRate">Heart Rate (bpm):</label>
-            <input
-              id="heartRate"
-              type="number"
-              value={editableStructuredData.heartRate || ''}
-              onChange={(e) => handleStructuredDataChange('heartRate', parseFloat(e.target.value) || '')}
-              placeholder="e.g., 72"
+            <label htmlFor="pastIllness">Past Illness History</label>
+            <textarea
+              id="pastIllness"
+              rows={4}
+              value={editableStructuredData.pastIllness || ''}
+              onChange={(e) => handleStructuredDataChange('pastIllness', e.target.value)}
+              placeholder="Past Illness History..."
             />
           </div>
-
           <div className="field-group">
-            <label htmlFor="temperature">Temperature (°F):</label>
-            <input
-              id="temperature"
-              type="number"
-              step="0.1"
-              value={editableStructuredData.temperature || ''}
-              onChange={(e) => handleStructuredDataChange('temperature', parseFloat(e.target.value) || '')}
-              placeholder="e.g., 98.6"
-            />
-          </div>
-
-          <div className="field-group">
-            <label htmlFor="symptoms">Symptoms:</label>
-            <input
+            <label htmlFor="symptoms">Symptoms</label>
+            <textarea
               id="symptoms"
-              type="text"
-              value={editableStructuredData.symptoms?.join(', ') || ''}
-              onChange={(e) => handleStructuredDataChange('symptoms', e.target.value.split(', ').filter(s => s.trim()))}
-              placeholder="e.g., headache, fatigue"
+              rows={4}
+              value={editableStructuredData.symptoms || ''}
+              onChange={(e) => handleStructuredDataChange('symptoms', e.target.value)}
+              placeholder="Symptoms..."
+            />
+          </div>
+          <div className="field-group">
+            <label htmlFor="treatment">Treatment Plan</label>
+            <textarea
+              id="treatment"
+              rows={4}
+              value={editableStructuredData.treatment || ''}
+              onChange={(e) => handleStructuredDataChange('treatment', e.target.value)}
+              placeholder="Treatment..."
             />
           </div>
         </div>
@@ -83,4 +78,4 @@ const StructuredDataEditor = ({ structuredData, setStructuredData, isParsing }) 
   )
 }
 
-export default StructuredDataEditor
+export default StructuredDataEditorDoctor
