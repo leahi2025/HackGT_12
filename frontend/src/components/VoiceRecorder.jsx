@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 
-const VoiceRecorder = ({ onAudioRecorded, isRecording, setIsRecording }) => {
+const VoiceRecorder = ({ onAudioRecorded, isRecording, setIsRecording, currentRole, setCurrentRole }) => {
   const [recordingTime, setRecordingTime] = useState(0)
   const [audioURL, setAudioURL] = useState('')
   const mediaRecorderRef = useRef(null)
@@ -57,9 +57,43 @@ const VoiceRecorder = ({ onAudioRecorded, isRecording, setIsRecording }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  const handleRoleChange = (role) => {
+    if (!isRecording) {
+      setCurrentRole(role)
+    }
+  }
+
   return (
     <div className="voice-recorder">
       <h2>Voice Recording</h2>
+      
+      <div className="role-toggle-container">
+        <label className="role-toggle-label">Recording As:</label>
+        <div className="role-toggle">
+          <div 
+            className={`role-option ${currentRole === 'nurse' ? 'active' : ''}`}
+            onClick={() => handleRoleChange('nurse')}
+          >
+            <span className="role-icon">👩‍⚕️</span>
+            Nurse
+          </div>
+          <div 
+            className={`role-option ${currentRole === 'doctor' ? 'active' : ''}`}
+            onClick={() => handleRoleChange('doctor')}
+          >
+            <span className="role-icon">👨‍⚕️</span>
+            Doctor
+          </div>
+        </div>
+        {isRecording && (
+          <div className="role-indicator">
+            <span className="role-icon">
+              {currentRole === 'doctor' ? '👨‍⚕️' : '👩‍⚕️'}
+            </span>
+            Recording as {currentRole}
+          </div>
+        )}
+      </div>
       
       <div className="recording-controls">
         <button 

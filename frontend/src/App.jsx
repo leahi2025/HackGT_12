@@ -12,6 +12,7 @@ function App() {
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [isParsing, setIsParsing] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [currentRole, setCurrentRole] = useState('nurse') // Change default to nurse
   const [visits, setVisits] = useState([
     {
       id: 1,
@@ -47,15 +48,27 @@ function App() {
     setTranscript(data.text);
     setIsTranscribing(false)
 
-    const prompt = `
-Extract the following metrics from this medical transcript:
+    const nursePrompt = `
+Extract the following metrics from this medical transcript of a conversation between a nurse and a patient:
 - Blood Pressure
+- Height
 - Heart Rate
 - Weight
 - Temperature
-- Symptoms (as an array of strings)
 
-Return as JSON with keys: bloodPressure (using a / instead of "over"), heartRate, weight, temperature, symptoms (array of strings).
+Return as JSON with keys: bloodPressure (using a / instead of "over"), height, heartRate, weight, temperature. If any metric is not mentioned, don't include it in the json response
+
+Transcript:
+"${data.text}"`.trim();
+const doctorPrompt = `
+Extract the following information from this medical transcript of a conversation between a doctor and a patient:
+- Chief Complaint
+- Present Illness History
+- Past Illness History
+- Symptoms
+- Treatment Plan
+
+Return as JSON with keys: chiefComplaint, presentIllness, pastIllness, symptoms, treatment. If any information is not mentioned, don't include it in the json response
 
 Transcript:
 "${data.text}"`.trim();
@@ -68,7 +81,7 @@ Transcript:
     },
     body: JSON.stringify({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: currentRole == 'nurse' ? nursePrompt : doctorPrompt}],
       max_tokens: 150,
       temperature: 0,
     }),
@@ -94,7 +107,8 @@ Transcript:
       patientId: currentPatient.id,
       date: new Date().toISOString().split('T')[0],
       transcript: transcript,
-      structuredData: structuredData
+      structuredData: structuredData,
+      recordedBy: currentRole // Include role in visit data
     }
     
     setVisits([newVisit, ...visits])
@@ -105,7 +119,7 @@ Transcript:
   return (
     <div className="medical-app">
       <header className="app-header">
-        <h1>Medical Voice Transcription System</h1>
+        <h1>EchoHealth Voice Transcription System</h1>
         <div className="patient-info">
           <strong>Current Patient: {currentPatient.name}</strong>
         </div>
@@ -117,6 +131,8 @@ Transcript:
             onAudioRecorded={handleAudioRecorded}
             isRecording={isRecording}
             setIsRecording={setIsRecording}
+            currentRole={currentRole}
+            setCurrentRole={setCurrentRole}
           />
         </div>
         
@@ -129,6 +145,7 @@ Transcript:
             onSave={handleSaveVisit}
             isTranscribing={isTranscribing}
             isParsing={isParsing}
+            currentRole={currentRole}
           />
         </div>
         

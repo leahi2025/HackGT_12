@@ -493,6 +493,75 @@
   margin: 40px 0;
 }
 
+/* Role Toggle Styles */
+.role-toggle-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.role-toggle-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.role-toggle {
+  display: flex;
+  background: #e9ecef;
+  border-radius: 25px;
+  padding: 3px;
+  position: relative;
+  width: 200px;
+  margin: 0 auto;
+}
+
+.role-option {
+  flex: 1;
+  padding: 10px 15px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 22px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.role-option.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.role-option:not(.active) {
+  color: #6c757d;
+}
+
+.role-option:not(.active):hover {
+  color: #495057;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.role-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.role-icon {
+  font-size: 1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-content {
