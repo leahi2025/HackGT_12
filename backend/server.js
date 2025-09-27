@@ -13,6 +13,7 @@ app.listen(3000, () => {
   console.log(`Server running on port ${process.env.PORT || 3000}`);
 });
 
+
 app.post("/signup", async (req, res) => {
   const { email, password, role } = req.body;
 
@@ -29,6 +30,27 @@ app.post("/signup", async (req, res) => {
     if (error) return res.status(400).json({ error: error.message });
 
     res.json({ user: data.user });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return res.status(400).json({ error: "Email and password required" });
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) return res.status(401).json({ error: error.message });
+
+    res.json({ user: data.user, session: data.session });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }
