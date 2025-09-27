@@ -62,30 +62,3 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-app.get("/session", async (req, res) => {
-  try {
-    const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // your real API key
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini-transcribe", // can be parameterized
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("OpenAI error:", data);
-      return res.status(500).json({ error: "Failed to create session" });
-    }
-
-    res.json(data); // returns ephemeral token + session config
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error creating session" });
-  }
-});
