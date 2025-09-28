@@ -17,7 +17,7 @@ function HCPAppointment() {
   const [isParsing, setIsParsing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [currentRole, setCurrentRole] = useState("nurse");
-    const [nurseRecords, setNurseRecords] = useState([]);
+  const [nurseRecords, setNurseRecords] = useState([]);
   const [visits, setVisits] = useState([]);
 
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -158,7 +158,7 @@ You are a strict formatter. Your job is ONLY to reformat a transcript into dialo
 Rules:
 - Do NOT invent or add new words. Output ONLY the transcript content.
 - Split the transcript into separate dialogue lines when there is a clear turn or sentence boundary.
-- Label each line as "Patient:" or "Doctor:" if obvious, otherwise use "Unclear:".
+- Label each line as either "${capitalizedRole}:" or ${currentPatient.name} if obvious, otherwise use "Unclear:".
 - If the transcript contains multiple sentences from different people in a single line, split them into separate dialogue turns.
 - Never collapse the entire transcript into one line.
 

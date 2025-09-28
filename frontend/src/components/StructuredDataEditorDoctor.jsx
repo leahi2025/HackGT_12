@@ -69,7 +69,7 @@ const StructuredDataEditorDoctor = ({ structuredData, setStructuredData, isParsi
               rows={4}
               value={editableStructuredData.treatment || ''}
               onChange={(e) => handleStructuredDataChange('treatment', e.target.value)}
-              placeholder="Treatment..."
+              placeholder="Treatment Plan..."
             />
           </div>
         </div>
