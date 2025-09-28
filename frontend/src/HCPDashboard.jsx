@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 function HCPDashboard() {
   const [upcoming, setUpcoming] = useState([]);
   const [previous, setPrevious] = useState([]);
+  const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
   const doctorId = localStorage.getItem("userId");
 
@@ -53,6 +54,8 @@ function HCPDashboard() {
       setPrevious(dataWithNames);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,35 +64,154 @@ function HCPDashboard() {
     fetchPrevious();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="medical-app">
+        <header className="app-header">
+          <h1>EchoHealth</h1>
+          <p className="patient-info">Loading your dashboard...</p>
+        </header>
+        <div className="loading-container">
+          <p>Loading appointments...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1>Doctor Dashboard</h1>
+    <div className="medical-app">
+      {/* Header */}
+      <header className="app-header">
+        <h1>EchoHealth - Doctor Dashboard</h1>
+        <p className="patient-info">
+          Welcome back - Managing your patient appointments
+        </p>
+      </header>
 
-      <section>
-        <h2>Upcoming Appointments</h2>
-        <ul>
-          {upcoming.map((appt) => (
-            <li key={appt.id}>
-              <Link to={`/appointments/${appt.id}`}>
-                {appt.date} — Patient {appt.patientName} ({appt.reason})
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Dashboard Content */}
+      <main className="hcp-dashboard-content">
+        {/* Upcoming Appointments Section */}
+        <section className="appointments-section upcoming-section">
+          <div className="section-header">
+            <h2>Upcoming Appointments</h2>
+            <div className="appointments-count">
+              {upcoming.length} scheduled
+            </div>
+          </div>
+          
+          <div className="appointments-list">
+            {upcoming.length > 0 ? (
+              upcoming.map((appt) => (
+                <Link 
+                  key={appt.id} 
+                  to={`/appointments/${appt.id}`} 
+                  className="appointment-card upcoming"
+                >
+                  <div className="appointment-header">
+                    <div className="appointment-date">
+                      <span className="date-primary">
+                        {new Date(appt.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </span>
+                      <span className="date-time">
+                        {new Date(appt.date).toLocaleTimeString('en-US', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </span>
+                    </div>
+                    <div className="appointment-status upcoming-status">
+                      Scheduled
+                    </div>
+                  </div>
+                  
+                  <div className="appointment-details">
+                    <div className="patient-info-card">
+                      <span className="patient-icon">👤</span>
+                      <span className="patient-name">{appt.patientName}</span>
+                    </div>
+                    
+                    <div className="appointment-reason">
+                      <span className="reason-icon">📋</span>
+                      <span className="reason-text">{appt.reason}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="no-appointments">
+                <div className="no-appointments-icon">📅</div>
+                <h3>No upcoming appointments</h3>
+                <p>Your schedule is clear for now.</p>
+              </div>
+            )}
+          </div>
+        </section>
 
-      <section>
-        <h2>Previous Appointments</h2>
-        <ul>
-          {previous.map((appt) => (
-            <li key={appt.id}>
-              <Link to={`/appointments/${appt.id}`}>
-                {appt.date} — Patient {appt.patientName} ({appt.reason})
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+        {/* Previous Appointments Section */}
+        <section className="appointments-section previous-section">
+          <div className="section-header">
+            <h2>Recent Appointments</h2>
+            <div className="appointments-count">
+              {previous.length} completed
+            </div>
+          </div>
+          
+          <div className="appointments-list">
+            {previous.length > 0 ? (
+              previous.map((appt) => (
+                <Link 
+                  key={appt.id} 
+                  to={`/appointments/${appt.id}`} 
+                  className="appointment-card previous"
+                >
+                  <div className="appointment-header">
+                    <div className="appointment-date">
+                      <span className="date-primary">
+                        {new Date(appt.date).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </span>
+                      <span className="date-time">
+                        {new Date(appt.date).toLocaleTimeString('en-US', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </span>
+                    </div>
+                    <div className="appointment-status completed-status">
+                      Completed
+                    </div>
+                  </div>
+                  
+                  <div className="appointment-details">
+                    <div className="patient-info-card">
+                      <span className="patient-icon">👤</span>
+                      <span className="patient-name">{appt.patientName}</span>
+                    </div>
+                    
+                    <div className="appointment-reason">
+                      <span className="reason-icon">📋</span>
+                      <span className="reason-text">{appt.reason}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="no-appointments">
+                <div className="no-appointments-icon">📋</div>
+                <h3>No recent appointments</h3>
+                <p>Previous appointments will appear here.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

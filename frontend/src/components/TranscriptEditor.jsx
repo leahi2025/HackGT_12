@@ -29,7 +29,7 @@ const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStruct
       {isTranscribing && (
         <p>Transcribing...</p>
       )}  
-      <div className="transcript-section">
+      <div className="transcript-section"> 
         <textarea
           value={dialogueTranscript}
           onChange={handleTranscriptChange}
