@@ -271,6 +271,9 @@ app.get("/previous-appointments", async (req, res) => {
 app.post("/appointments", async (req, res) => {
   const { patient, hcp, date, reason } = req.body;
 
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
   try {
     const { data, error } = await supabase
       .from("appointments")
@@ -284,7 +287,7 @@ app.post("/appointments", async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: err.message || "Server error" });
   }
 });
 

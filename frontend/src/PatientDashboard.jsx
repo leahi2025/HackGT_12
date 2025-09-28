@@ -4,6 +4,7 @@ function PatientDashboard() {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
   const [records, setRecords] = useState([]);
+  const [hcps, setHcps] = useState([]);
   const [newAppointment, setNewAppointment] = useState({
     hcp: "",
     date: "",
@@ -52,6 +53,21 @@ function PatientDashboard() {
     }
   };
 
+  // Fetch HCPs matching the patient's category_of_concern
+  const fetchHcps = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/hcp", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHcps(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Schedule appointment
   const handleScheduleAppointment = async (e) => {
     e.preventDefault();
@@ -86,6 +102,7 @@ function PatientDashboard() {
     fetchUpcomingAppointments();
     fetchPastAppointments();
     fetchRecords();
+    fetchHcps(); // fetch HCPs for the dropdown
   }, []);
 
   return (
@@ -132,15 +149,24 @@ function PatientDashboard() {
       <section>
         <h2>Schedule New Appointment</h2>
         <form onSubmit={handleScheduleAppointment}>
-          <input
-            type="text"
-            placeholder="HCP ID"
-            value={newAppointment.hcp}
-            onChange={(e) =>
-              setNewAppointment({ ...newAppointment, hcp: e.target.value })
-            }
-            required
-          />
+          <label>
+            Select Doctor:
+            <select
+              value={newAppointment.hcp}
+              onChange={(e) =>
+                setNewAppointment({ ...newAppointment, hcp: e.target.value })
+              }
+              required
+            >
+              <option value="">--Select--</option>
+              {hcps.map((hcp) => (
+                <option key={hcp.id} value={hcp.id}>
+                  {hcp.name} ({hcp.specialty})
+                </option>
+              ))}
+            </select>
+          </label>
+
           <input
             type="datetime-local"
             value={newAppointment.date}

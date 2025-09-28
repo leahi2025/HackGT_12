@@ -20,7 +20,7 @@ function Login() {
       if (res.ok) {
         setMessage("Login successful!");
         console.log("User:", data.user);
-        // TODO: Store session/token in localStorage or context
+
         localStorage.setItem("token", data.session.access_token);
         localStorage.setItem("userId", data.user.id);
       } else {

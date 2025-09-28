@@ -1,7 +1,7 @@
 // Profile.jsx
 import { useEffect, useState } from "react";
 
-function Profile() {
+function PatientProfile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
@@ -92,4 +92,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default PatientProfile;
