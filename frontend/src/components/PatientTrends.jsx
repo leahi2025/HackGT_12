@@ -1,16 +1,16 @@
 import { useState } from 'react'
 
-const PatientTrends = ({ visits }) => {
+const PatientTrends = ({ nurseRecords }) => {
   const [selectedMetric, setSelectedMetric] = useState('weight')
 
   const getChartData = (metric) => {
-    const data = visits
-      .filter(visit => visit.structuredData && visit.structuredData[metric])
-      .map(visit => ({
-        date: visit.date,
+    const data = nurseRecords
+      .filter(record => record.structuredData && record.structuredData[metric])
+      .map(record => ({
+        date: record.date,
         value: metric === 'bloodPressure' 
-          ? visit.structuredData[metric]
-          : parseFloat(visit.structuredData[metric])
+          ? record.structuredData[metric]
+          : parseFloat(record.structuredData[metric])
       }))
       .reverse() // Show oldest to newest
     
@@ -108,14 +108,14 @@ const PatientTrends = ({ visits }) => {
   }
 
   const availableMetrics = ['weight', 'bloodPressure', 'heartRate', 'temperature']
-    .filter(metric => visits.some(visit => visit.structuredData && visit.structuredData[metric]))
+    .filter(metric => nurseRecords.some(record => record.structuredData && record.structuredData[metric]))
 
   return (
     <div className="patient-trends">
       <h2>Patient Trends</h2>
       
       {availableMetrics.length === 0 ? (
-        <p className="no-trends">No trend data available. Record some visits with vitals to see trends.</p>
+        <p className="no-trends">No trend data available. Record some nurse records with vitals to see trends.</p>
       ) : (
         <>
           <div className="trend-controls">

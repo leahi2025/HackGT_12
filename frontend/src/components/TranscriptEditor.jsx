@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import StructuredDataEditorNurse from './StructuredDataEditorNurse'
 import StructuredDataEditorDoctor from './StructuredDataEditorDoctor'
 
-const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStructuredData, onSave, isTranscribing, isParsing,currentRole }) => {
+const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStructuredData, onSave, isTranscribing, isParsing, currentRole, dialogueTranscript, isFormattingDialogue }) => {
   const [editableTranscript, setEditableTranscript] = useState('')
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStruct
       <div className="transcript-section">
         <h3>Transcript</h3>
         <textarea
-          value={editableTranscript}
+          value={dialogueTranscript}
           onChange={handleTranscriptChange}
           placeholder="Transcript will appear here after recording..."
           rows={6}
