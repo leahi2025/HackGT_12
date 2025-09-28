@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import PatientHomepage from "./PatientHomepage";
-import HCPDashboard from "./HCPDashboard";
+import PatientAppointment from "./PatientAppointment";
+import HCPAppointment from "./HCPAppointment";
 import { getUserType } from "./components/GetUserType";
 
-function Dashboard() {
+function Appointment() {
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     const checkUser = async () => {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
+      
       if (!token || !userId) {
         setLoading(false);
         return;
@@ -28,7 +31,11 @@ function Dashboard() {
 
   if (!userType) return <p>User not found</p>;
 
-  return userType === "patient" ? <PatientHomepage /> : <HCPDashboard />;
+  if (userType === "hcp") {
+    return <HCPAppointment id={userId} />;
+  } else if (userType === "patient") {
+    return <PatientAppointment id={userId} />;
+  }
 }
 
-export default Dashboard;
+export default Appointment;

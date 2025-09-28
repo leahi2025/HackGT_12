@@ -99,7 +99,7 @@ app.get("/patients/:id", async (req, res) => {
     .from("patients")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (patientError) return res.status(400).json({ error: patientError.message });
   if (!patient) return res.status(404).json({ error: "Patient profile not found" });
@@ -132,7 +132,7 @@ app.get("/hcp/:id", async (req, res) => {
     .from("hcp")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (hcpError) return res.status(400).json({ error: hcpError.message });
   if (!hcp) return res.status(404).json({ error: "Healthcare professional profile not found" });
@@ -251,7 +251,7 @@ app.get("/upcoming-appointments", async (req, res) => {
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
-  const { data, error } = await supabase.from("appointments").select("*").filter('occurred','eq', false).order('date', { ascending: true });
+  const { data, error } = await supabase.from("appointments").select("*, patient:patients(id, name), hcp:hcp(id, name)").filter('occurred','eq', false).order('date', { ascending: true });
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
@@ -267,6 +267,19 @@ app.get("/previous-appointments", async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
 });
+
+app.get("/appointments/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
+  const { data, error } = await supabase.from("appointments").select("*, patient:patients(id, name), hcp:hcp(id, name)").eq("id", id).single();
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
 
 app.post("/appointments", async (req, res) => {
   const { patient, hcp, date, reason } = req.body;

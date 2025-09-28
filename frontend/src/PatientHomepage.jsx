@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function PatientDashboard() {
+function PatientHomepage() {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
   const [records, setRecords] = useState([]);
@@ -191,4 +191,4 @@ function PatientDashboard() {
   );
 }
 
-export default PatientDashboard;
+export default PatientHomepage;

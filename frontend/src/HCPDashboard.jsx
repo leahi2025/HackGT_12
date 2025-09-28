@@ -1,38 +1,95 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function HCPDashboard() {
-  const [appointments, setAppointments] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+  const [previous, setPrevious] = useState([]);
   const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId"); // HCP ID
+  const doctorId = localStorage.getItem("userId");
 
-  // Fetch appointments for this doctor
-  const fetchAppointments = async () => {
+  // Fetch upcoming appointments
+  const fetchUpcoming = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/upcoming-appointments`, {
+      const res = await fetch(`http://localhost:3000/upcoming-appointments/${doctorId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (res.ok) setAppointments(data);
+
+      // If your backend only returns patient IDs, fetch their names
+      const dataWithNames = await Promise.all(
+        data.map(async (appt) => {
+          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const patientData = await patientRes.json();
+          return { ...appt, patientName: patientData.name };
+        })
+      );
+
+      setUpcoming(dataWithNames);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Fetch previous appointments
+  const fetchPrevious = async () => {
+    try {
+      const res = await fetch(`http://localhost:3000/previous-appointments/${doctorId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      const dataWithNames = await Promise.all(
+        data.map(async (appt) => {
+          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const patientData = await patientRes.json();
+          return { ...appt, patientName: patientData.name };
+        })
+      );
+
+      setPrevious(dataWithNames);
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchAppointments();
+    fetchUpcoming();
+    fetchPrevious();
   }, []);
 
   return (
     <div>
       <h1>Doctor Dashboard</h1>
-      <h2>Appointments with You</h2>
-      <ul>
-        {appointments.map((appt) => (
-          <li key={appt.id}>
-            {appt.date} — Patient {appt.patient} ({appt.reason})
-          </li>
-        ))}
-      </ul>
+
+      <section>
+        <h2>Upcoming Appointments</h2>
+        <ul>
+          {upcoming.map((appt) => (
+            <li key={appt.id}>
+              <Link to={`/appointments/${appt.id}`}>
+                {appt.date} — Patient {appt.patientName} ({appt.reason})
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Previous Appointments</h2>
+        <ul>
+          {previous.map((appt) => (
+            <li key={appt.id}>
+              <Link to={`/appointments/${appt.id}`}>
+                {appt.date} — Patient {appt.patientName} ({appt.reason})
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
