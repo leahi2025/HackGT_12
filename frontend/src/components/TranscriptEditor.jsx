@@ -30,7 +30,6 @@ const TranscriptEditor = ({ transcript, setTranscript, structuredData, setStruct
         <p>Transcribing...</p>
       )}  
       <div className="transcript-section">
-        <h3>Transcript</h3>
         <textarea
           value={editableTranscript}
           onChange={handleTranscriptChange}

@@ -187,7 +187,10 @@ Transcript:
         
         <div className="dashboard-section">
           <PatientDashboard visits={visits.filter(v => v.patientId === currentPatient.id)} />
-          <PatientTrends visits={visits.filter(v => v.patientId === currentPatient.id)} />
+          
+        </div>
+        <div className='trends-section'>
+<PatientTrends visits={visits.filter(v => v.patientId === currentPatient.id)} />
         </div>
       </div>
     </div>

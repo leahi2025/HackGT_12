@@ -35,20 +35,21 @@
 
 .recording-section {
   grid-column: 1 / 2;
-  grid-row: 1;
+  grid-row: 1/2;
 }
 
 .transcript-section {
   grid-column: 2 / 3;
-  grid-row: 1;
+  grid-row: 1/3;
 }
 
 .dashboard-section {
+  grid-column: 1 / 2;
+  grid-row: 2/3;
+}
+.trends-section {
   grid-column: 1 / 3;
-  grid-row: 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  grid-row: 3;
 }
 
 /* Voice Recorder Styles */
@@ -234,15 +235,32 @@
   font-size: 14px;
   resize: vertical;
   transition: border-color 0.3s ease;
+  background: #ffffff;
+  color: #2c3e50;
+  line-height: 1.5;
 }
 
 .transcript-textarea:focus {
   outline: none;
   border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.transcript-textarea::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
 }
 
 .structured-data-section {
   margin-top: 25px;
+  background: #ffffff;
+  padding: 0;
+}
+
+.structured-data-section h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 15px;
 }
 
 .data-fields {
@@ -269,11 +287,71 @@
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.3s ease;
+  background: #ffffff;
+  color: #2c3e50;
 }
 
 .field-group input:focus {
   outline: none;
   border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-group input::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
+}
+
+/* Number input spinner controls */
+.field-group input[type="number"]::-webkit-outer-spin-button,
+.field-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.field-group input[type="number"] {
+  -moz-appearance: textfield;
+  background: #ffffff;
+  color: #2c3e50;
+}
+
+/* Custom number input styling for better UX */
+.field-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: inner-spin-button;
+  background: #f8f9fa;
+  border-left: 1px solid #e1e5e9;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.field-group input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: inner-spin-button;
+  background: #f8f9fa;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.field-group textarea {
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  background: #ffffff;
+  line-height: 1.5;
+}
+
+.field-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-group textarea::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
 }
 
 .save-button {
