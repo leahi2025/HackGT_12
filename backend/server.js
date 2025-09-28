@@ -145,7 +145,14 @@ app.get("/nurse-records", async (req, res) => {
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
-  const { data, error } = await supabase.from("nurse_records").select("*").order('created_at', { ascending: false });
+  const appointmentId = req.query.appointment;
+
+  let query = supabase.from("nurse_records").select("*").order('created_at', { ascending: false });
+  if (appointmentId) {
+    query = query.eq("appointment", appointmentId);
+  }
+
+  const { data, error } = await query;
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
@@ -180,18 +187,20 @@ app.patch("/nurse-records/:id", async (req, res) => {
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
+  console.log(req.body);
   try {
 
     const { data, error: updateError } = await supabase
       .from("nurse_records")
       .update(updates)
-      .eq("id", id)
+      .eq("id", parseInt(id))
       .select()
       .single();
 
     if (updateError) return res.status(400).json({ error: updateError.message });
 
     res.json(data);
+    console.log(data);
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }

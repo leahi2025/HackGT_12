@@ -218,7 +218,7 @@ Patient: Two days.
     try {
       // Check if nurse record exists for this appointment
       const resCheck = await fetch(
-        `http://localhost:3000/nurse-records?appointmentId=${id}`,
+        `http://localhost:3000/nurse-records?appointment=${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -336,4 +336,4 @@ Patient: Two days.
   )
 }
 
-export default HCPAppointment
+export default HCPAppointment;
