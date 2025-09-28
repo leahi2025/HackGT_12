@@ -74,14 +74,12 @@ const VoiceRecorder = ({ onAudioRecorded, isRecording, setIsRecording, currentRo
             className={`role-option ${currentRole === 'nurse' ? 'active' : ''}`}
             onClick={() => handleRoleChange('nurse')}
           >
-            <span className="role-icon">👩‍⚕️</span>
             Nurse
           </div>
           <div 
             className={`role-option ${currentRole === 'doctor' ? 'active' : ''}`}
             onClick={() => handleRoleChange('doctor')}
           >
-            <span className="role-icon">👨‍⚕️</span>
             Doctor
           </div>
         </div>
