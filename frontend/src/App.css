@@ -167,12 +167,6 @@
   border-radius: 8px;
 }
 
-.audio-playback audio::-webkit-media-controls-play-button,
-.audio-playback audio::-webkit-media-controls-pause-button {
-  background: #667eea;
-  border-radius: 50%;
-  margin-left: 8px;
-}
 
 .audio-playback audio::-webkit-media-controls-timeline {
   background: #e9ecef;
@@ -1356,5 +1350,443 @@
   
   .no-appointments-icon {
     font-size: 2.5rem;
+  }
+}
+
+/* HCP Profile Styles */
+.profile-content {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.profile-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+  width: 100%;
+  max-width: 800px;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.profile-icon {
+  font-size: 4rem;
+  margin-bottom: 15px;
+}
+
+.profile-header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.profile-header p {
+  color: #5a6c7d;
+  font-size: 1rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section h3 {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.profile-form .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-form .field-group label {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.profile-input,
+.profile-select {
+  padding: 14px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  color: #2c3e50;
+}
+
+.profile-input:focus,
+.profile-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.profile-input::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
+}
+
+.profile-select {
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.save-profile-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  min-width: 180px;
+}
+
+.save-profile-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.save-profile-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.save-profile-button.saving {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+
+.profile-message {
+  margin-top: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.profile-message.success {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.profile-message.error {
+  background: linear-gradient(135deg, #f8d7da, #f1b6bb);
+  color: #721c24;
+  border: 1px solid #f1b6bb;
+}
+
+/* Responsive Design for HCP Profile */
+@media (max-width: 768px) {
+  .profile-content {
+    padding: 15px;
+  }
+  
+  .profile-card {
+    padding: 30px 20px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .profile-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .profile-icon {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-card {
+    padding: 25px 15px;
+  }
+  
+  .profile-header h2 {
+    font-size: 1.6rem;
+  }
+  
+  .save-profile-button {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Signup Page Styles */
+.signup-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+}
+
+.signup-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+  width: 100%;
+  max-width: 500px;
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.signup-header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.signup-header p {
+  color: #5a6c7d;
+  font-size: 1rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.signup-form .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signup-form .field-group label {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.signup-input,
+.signup-select {
+  padding: 14px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  color: #2c3e50;
+}
+
+.signup-input:focus,
+.signup-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.signup-input::placeholder {
+  color: #6c757d;
+  opacity: 0.8;
+}
+
+.signup-select {
+  cursor: pointer;
+}
+
+.role-description {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 5px 0 0 0;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.signup-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.signup-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.signup-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.signup-button.loading {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+
+.signup-message {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.signup-message.success {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.signup-message.error {
+  background: linear-gradient(135deg, #f8d7da, #f1b6bb);
+  color: #721c24;
+  border: 1px solid #f1b6bb;
+}
+
+.signup-footer {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.signup-footer p {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.signup-footer a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.signup-footer a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* Responsive Design for Signup */
+@media (max-width: 768px) {
+  .signup-content {
+    padding: 20px 15px;
+    min-height: 50vh;
+  }
+  
+  .signup-card {
+    padding: 30px 20px;
+  }
+  
+  .signup-header h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-card {
+    padding: 25px 15px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}  line-height: 1.5;  margin: 0 0 25px 0;  font-size: 1rem;  color: #5a6c7d;.error-card p {}  margin: 0 0 15px 0;  font-weight: 600;  font-size: 1.5rem;  color: #2c3e50;.error-card h3 {}  width: 100%;  max-width: 400px;  text-align: center;  border: 1px solid #e1e5e9;  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);  border-radius: 12px;  padding: 40px;  background: white;.error-card {}  padding: 40px 20px;  min-height: 300px;  align-items: center;  justify-content: center;  display: flex;.error-container {/* Error Container Styles */}  }    font-size: 1.6rem;  .signup-header h2 {    }  }
+  
+  .signup-header h2 {
+    font-size: 1.6rem;
   }
 }
