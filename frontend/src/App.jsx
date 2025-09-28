@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import './App.css'
 import VoiceRecorder from './components/VoiceRecorder'
 import TranscriptEditor from './components/TranscriptEditor'
@@ -14,7 +15,8 @@ function App() {
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [isParsing, setIsParsing] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
-  const [currentRole, setCurrentRole] = useState('nurse') // Change default to nurse
+  const [currentRole, setCurrentRole] = useState('nurse')
+  const [nurseRecords, setNurseRecords] = useState([]);
   const [visits, setVisits] = useState([
     {
       id: 1,
@@ -32,6 +34,22 @@ function App() {
     }
   ])
 
+  useEffect(() => {
+    // Fetch nurse records for the current patient
+    const fetchNurseRecords = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/nurse-records?patientId=${currentPatient.id}`);
+        if (!res.ok) throw new Error('Failed to fetch nurse records');
+        const data = await res.json();
+        setNurseRecords(data);
+      } catch (err) {
+        console.error('Error fetching nurse records:', err);
+        setNurseRecords([]);
+      }
+    };
+    fetchNurseRecords();
+  }, [currentPatient]);
+
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   const handleAudioRecorded = async (audioBlob) => {
@@ -43,7 +61,7 @@ function App() {
     const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`, // set this in .env
+        Authorization: `Bearer ${apiKey}`,
       },
       body: formData
     });
@@ -51,6 +69,7 @@ function App() {
     const data = await res.json();
     setTranscript(data.text);
     setIsTranscribing(false)
+    console.log("Transcription result:", data.text);
 
     const nursePrompt = `
 Extract the following metrics from this medical transcript of a conversation between a nurse and a patient:
@@ -60,7 +79,14 @@ Extract the following metrics from this medical transcript of a conversation bet
 - Weight
 - Temperature
 
-Return as JSON with keys: bloodPressure (using a / instead of "over"), height, heartRate, weight, temperature. If any metric is not mentioned, don't include it in the json response
+Rules:
+- Only include metrics that are explicitly stated with a numeric value (e.g., "120/80", "70 kilograms", "98.6 degrees").
+- Ignore qualitative phrases (e.g., "high fever", "low blood pressure", "normal weight") if no number is provided.
+- All metrics must be numeric. If a number cannot be determined, do not include that metric.
+- Do not guess or infer values.
+
+Return as JSON with keys: bloodPressure (using "/" instead of "over"), height, heartRate, weight, temperature.
+If a metric is not present with a numeric value, exclude it from the JSON.
 
 Transcript:
 "${data.text}"`.trim();
@@ -105,11 +131,27 @@ Transcript:
   setStructuredData(extracted);
 
   setIsFormattingDialogue(true);
+  const capitalizedRole = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
   const dialoguePrompt = `
-Format the following medical transcript as a dialogue between a Patient and a Nurse. The patient's name is ${currentPatient.name}.
-Label each line with "${currentPatient.name}:" or "Nurse:" as appropriate. If the speaker is unclear, make your best guess.
+You are a strict formatter. Your job is ONLY to reformat a transcript into dialogue.
 
-Transcript:
+Rules:
+- Do NOT invent or add new words. Output ONLY the transcript content.
+- Split the transcript into separate dialogue lines when there is a clear turn or sentence boundary.
+- Label each line as "Patient:" or "Doctor:" if obvious, otherwise use "Unclear:".
+- If the transcript contains multiple sentences from different people in a single line, split them into separate dialogue turns.
+- Never collapse the entire transcript into one line.
+
+Examples:
+Transcript: "Hi"
+Output:
+Unclear: Hi
+
+Transcript: "I have chest pain. How long have you had it? Two days."
+Output:
+Patient: I have chest pain.
+Doctor: How long have you had it?
+Patient: Two days.
 "${data.text}"`.trim();
   const dialogueRes = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -182,6 +224,8 @@ Transcript:
             isTranscribing={isTranscribing}
             isParsing={isParsing}
             currentRole={currentRole}
+            dialogueTranscript={dialogueTranscript}
+            isFormattingDialogue={isFormattingDialogue}
           />
         </div>
         
