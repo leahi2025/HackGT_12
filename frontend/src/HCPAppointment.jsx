@@ -279,19 +279,91 @@ Patient: Two days.
 }
 
 
-  const handleSaveVisit = () => {
+  const handleSaveVisit = async () => {
+    if (!currentPatient) return;
+
     const newVisit = {
-      id: visits.length + 1,
-      patientId: currentPatient.id,
-      date: new Date().toISOString().split("T")[0],
+      patient: currentPatient.id,
       transcript: transcript,
       structuredData: structuredData,
-      recordedBy: currentRole,
+      appointment: id, // tie visit to appointment
     };
 
+    // Update local state
     setVisits([newVisit, ...visits]);
     setTranscript("");
     setStructuredData({});
+
+    try {
+      // Check if nurse record exists for this appointment
+      const resCheck = await fetch(
+        `http://localhost:3000/nurse-records?appointment=${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const existingRecords = await resCheck.json();
+      const userId = localStorage.getItem("userId");
+      if (resCheck.ok && existingRecords.length > 0) {
+        // Record exists → update it
+        const recordId = existingRecords[0].id;
+        
+        const resUpdate = await fetch(`http://localhost:3000/nurse-records/${recordId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            transcript: newVisit.transcript,
+            height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
+            weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
+            blood_pressure: newVisit.structuredData.bloodPressure, // as text
+            heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
+            temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
+            appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
+            patient: currentPatient.id, 
+            hcp: userId
+          }),
+        });
+
+        if (!resUpdate.ok) {
+          const errData = await resUpdate.json();
+          console.error("Failed to update nurse record:", errData);
+        } else {
+          console.log("Nurse record updated successfully");
+        }
+      } else {
+        // Record does not exist → create new
+        const resCreate = await fetch("http://localhost:3000/nurse-records", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            transcript: newVisit.transcript,
+            height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
+            weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
+            blood_pressure: newVisit.structuredData.bloodPressure, // as text
+            heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
+            temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
+            appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
+            patient: currentPatient.id, 
+            hcp: userId
+          }),
+        });
+
+        if (!resCreate.ok) {
+          const errData = await resCreate.json();
+          console.error("Failed to create nurse record:", errData);
+        } else {
+          console.log("Nurse record created successfully");
+        }
+      }
+    } catch (err) {
+      console.error("Error saving nurse record:", err);
+    }
   };
 
   if (!currentPatient) return <div>Loading appointment...</div>;
@@ -343,4 +415,4 @@ Patient: Two days.
   )
 }
 
-export default HCPAppointment
+export default HCPAppointment;
