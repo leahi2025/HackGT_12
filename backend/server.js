@@ -154,6 +154,10 @@ app.get("/nurse-records", async (req, res) => {
 
 app.post("/nurse-records", async (req, res) => {
 
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+  const { data, error } = await supabase.auth.getUser()
+
   try {
     const { data, error } = await supabase
       .from("nurse_records")
@@ -165,7 +169,7 @@ app.post("/nurse-records", async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: err.message || "Server error"});
   }
 });
 
