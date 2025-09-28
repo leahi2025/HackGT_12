@@ -1,4 +1,4 @@
-const PatientDashboard = ({ nurseRecords }) => {
+const PatientDashboard = ({ nurseRecords = [] }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -8,8 +8,7 @@ const PatientDashboard = ({ nurseRecords }) => {
   }
 
   const getLatestVitals = () => {
-    if (nurseRecords.length === 0) return null
-    
+    if (!Array.isArray(nurseRecords) || nurseRecords.length === 0) return null
     const latestVisit = nurseRecords[0]
     return latestVisit.structuredData
   }
@@ -56,11 +55,11 @@ const PatientDashboard = ({ nurseRecords }) => {
       )}
 
       <div className="visit-history">
-        <h3>Recent nurseRecords ({nurseRecords.length})</h3>
-        
-        {nurseRecords.length === 0 ? (
-          <p className="no-nurseRecords">No nurse records recorded yet.</p>
-        ) : (
+      {nurseRecords.length === 0 ? (
+        <p className="no-nurseRecords">No nurse records recorded yet.</p>
+      ) : (
+        <>
+          <h3>Recent nurseRecords ({nurseRecords.length})</h3>
           <div className="nurseRecords-list">
             {nurseRecords.map((visit) => (
               <div key={visit.id} className="visit-card">
@@ -68,12 +67,10 @@ const PatientDashboard = ({ nurseRecords }) => {
                   <div className="visit-date">{formatDate(visit.created_at)}</div>
                   <div className="visit-id">Visit #{visit.id}</div>
                 </div>
-                
                 <div className="visit-content">
                   <div className="visit-transcript">
                     <strong>Notes:</strong> {visit.transcript}
                   </div>
-                  
                   {visit.structuredData && Object.keys(visit.structuredData).length > 0 && (
                     <div className="visit-vitals">
                       <strong>Vitals:</strong>
@@ -93,7 +90,6 @@ const PatientDashboard = ({ nurseRecords }) => {
                       </div>
                     </div>
                   )}
-                  
                   {visit.structuredData?.symptoms && visit.structuredData.symptoms.length > 0 && (
                     <div className="visit-symptoms">
                       <strong>Symptoms:</strong> {visit.structuredData.symptoms.join(', ')}
@@ -103,9 +99,10 @@ const PatientDashboard = ({ nurseRecords }) => {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
+  </div>
   )
 }
 

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
-const PatientTrends = ({ nurseRecords }) => {
+const PatientTrends = ({ nurseRecords = [] }) => {
   const [selectedMetric, setSelectedMetric] = useState('weight')
 
   const getChartData = (metric) => {
+    if (!Array.isArray(nurseRecords)) return [];
     const data = nurseRecords
       .filter(record => record.structuredData && record.structuredData[metric])
       .map(record => ({
