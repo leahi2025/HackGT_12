@@ -10,7 +10,7 @@ function HCPDashboard() {
   // Fetch upcoming appointments
   const fetchUpcoming = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/upcoming-appointments/${doctorId}`, {
+      const res = await fetch(`http://localhost:3000/upcoming-appointments/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -18,7 +18,7 @@ function HCPDashboard() {
       // If your backend only returns patient IDs, fetch their names
       const dataWithNames = await Promise.all(
         data.map(async (appt) => {
-          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient}`, {
+          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const patientData = await patientRes.json();
@@ -35,14 +35,14 @@ function HCPDashboard() {
   // Fetch previous appointments
   const fetchPrevious = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/previous-appointments/${doctorId}`, {
+      const res = await fetch(`http://localhost:3000/previous-appointments/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
 
       const dataWithNames = await Promise.all(
         data.map(async (appt) => {
-          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient}`, {
+          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const patientData = await patientRes.json();
