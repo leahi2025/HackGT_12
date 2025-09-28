@@ -58,8 +58,12 @@ function HCPAppointment() {
   useEffect(() => {
     // Fetch nurse records for the current patient
     const fetchNurseRecords = async () => {
+      if (!currentPatient) return;
+
       try {
-        const res = await fetch(`http://localhost:3000/nurse-records?patientId=${currentPatient.id}`);
+        const res = await fetch(`http://localhost:3000/nurse-records?patient=${currentPatient.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (!res.ok) throw new Error('Failed to fetch nurse records');
         const data = await res.json();
         setNurseRecords(data);
@@ -216,72 +220,141 @@ Patient: Two days.
     setStructuredData({});
 
     try {
-      // Check if nurse record exists for this appointment
-      const resCheck = await fetch(
-        `http://localhost:3000/nurse-records?appointment=${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const existingRecords = await resCheck.json();
       const userId = localStorage.getItem("userId");
-      if (resCheck.ok && existingRecords.length > 0) {
+
+      if (currentRole === 'nurse') {
+        const resCheck = await fetch(
+          `http://localhost:3000/nurse-records?appointment=${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const existingRecords = await resCheck.json();
+
+        if (resCheck.ok && existingRecords.length > 0) {
         // Record exists → update it
-        const recordId = existingRecords[0].id;
-        
-        const resUpdate = await fetch(`http://localhost:3000/nurse-records/${recordId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            transcript: newVisit.transcript,
-            height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
-            weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
-            blood_pressure: newVisit.structuredData.bloodPressure, // as text
-            heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
-            temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
-            appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
-            patient: currentPatient.id, 
-            hcp: userId
-          }),
-        });
+          const recordId = existingRecords[0].id;
+          
+          const resUpdate = await fetch(`http://localhost:3000/nurse-records/${recordId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              transcript: newVisit.transcript,
+              height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
+              weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
+              blood_pressure: newVisit.structuredData.bloodPressure, // as text
+              heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
+              temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
+              appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
+              patient: currentPatient.id, 
+              hcp: userId
+            }),
+          });
 
-        if (!resUpdate.ok) {
-          const errData = await resUpdate.json();
-          console.error("Failed to update nurse record:", errData);
+          if (!resUpdate.ok) {
+            const errData = await resUpdate.json();
+            console.error("Failed to update nurse record:", errData);
+          } else {
+            console.log("Nurse record updated successfully");
+          }
         } else {
-          console.log("Nurse record updated successfully");
+          // Record does not exist → create new
+          const resCreate = await fetch("http://localhost:3000/nurse-records", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              transcript: newVisit.transcript,
+              height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
+              weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
+              blood_pressure: newVisit.structuredData.bloodPressure, // as text
+              heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
+              temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
+              appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
+              patient: currentPatient.id, 
+              hcp: userId
+            }),
+          });
+
+          if (!resCreate.ok) {
+            const errData = await resCreate.json();
+            console.error("Failed to create nurse record:", errData);
+          } else {
+            console.log("Nurse record created successfully");
+          }
         }
-      } else {
-        // Record does not exist → create new
-        const resCreate = await fetch("http://localhost:3000/nurse-records", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            transcript: newVisit.transcript,
-            height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
-            weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
-            blood_pressure: newVisit.structuredData.bloodPressure, // as text
-            heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
-            temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
-            appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
-            patient: currentPatient.id, 
-            hcp: userId
-          }),
-        });
+      } else if (currentRole === 'doctor') {
+        const resCheck = await fetch(
+          `http://localhost:3000/doctor-records?appointment=${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const existingRecords = await resCheck.json();
 
-        if (!resCreate.ok) {
-          const errData = await resCreate.json();
-          console.error("Failed to create nurse record:", errData);
+        if (resCheck.ok && existingRecords.length > 0) {
+          const recordId = existingRecords[0].id;
+          const resUpdate = await fetch(
+            `http://localhost:3000/doctor-records/${recordId}`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                transcript: newVisit.transcript,
+                chief_complaint: newVisit.structuredData.chiefComplaint || null,
+                present_illness: newVisit.structuredData.presentIllness || null,
+                past_illness: newVisit.structuredData.pastIllness || null,
+                symptoms: newVisit.structuredData.symptoms || null,
+                treatment: newVisit.structuredData.treatment || null,
+                appointment: parseInt(id),
+                patient: currentPatient.id,
+                hcp: userId,
+              }),
+            }
+          );
+
+          if (!resUpdate.ok) {
+            console.error("Failed to update doctor record:", await resUpdate.json());
+          } else {
+            console.log("Doctor record updated successfully");
+          }
         } else {
-          console.log("Nurse record created successfully");
+          const resCreate = await fetch("http://localhost:3000/doctor-records", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              transcript: newVisit.transcript,
+              chief_complaint: newVisit.structuredData.chiefComplaint || null,
+              present_illness: newVisit.structuredData.presentIllness || null,
+              past_illness: newVisit.structuredData.pastIllness || null,
+              symptoms: newVisit.structuredData.symptoms || null,
+              treatment: newVisit.structuredData.treatment || null,
+              appointment: parseInt(id),
+              patient: currentPatient.id,
+              hcp: userId,
+            }),
+          });
+
+          if (!resCreate.ok) {
+            console.error("Failed to create doctor record:", await resCreate.json());
+          } else {
+            console.log("Doctor record created successfully");
+          }
         }
       }
+      
+      // Check if nurse record exists for this appointment
+      
+      
     } catch (err) {
       console.error("Error saving nurse record:", err);
     }
@@ -325,11 +398,11 @@ Patient: Two days.
         </div>
         
         <div className="dashboard-section">
-          <PatientDashboard visits={visits.filter(v => v.patientId === currentPatient.id)} />
+          <PatientDashboard nurseRecords={nurseRecords}/>
           
         </div>
         <div className='trends-section'>
-<PatientTrends visits={visits.filter(v => v.patientId === currentPatient.id)} />
+<PatientTrends patient={currentPatient.id}/>
         </div>
       </div>
     </div>

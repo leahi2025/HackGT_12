@@ -1,31 +1,65 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-const PatientTrends = ({ nurseRecords = [] }) => {
+const PatientTrends = ({ patient }) => {
+  const [nurseRecords, setNurseRecords] = useState([])
   const [selectedMetric, setSelectedMetric] = useState('weight')
+  const token = localStorage.getItem("token")
+
+  // Fetch nurse records for this patient
+  useEffect(() => {
+    if (!patient) return
+
+    const fetchRecords = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/nurse-records?patient=${patient}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to fetch nurse records')
+        const data = await res.json()
+        console.log(data)
+        const normalized = data.map(record => ({
+          ...record,
+          structuredData: {
+            weight: record.weight,
+            bloodPressure: record.blood_pressure,
+            heartRate: record.heart_rate,
+            temperature: record.temperature,
+            height: record.height
+          }
+        }))
+        console.log('Normalized records:', normalized)
+        setNurseRecords(normalized)
+      } catch (err) {
+        console.error('Error fetching nurse records:', err)
+        setNurseRecords([])
+      }
+    }
+
+    fetchRecords()
+  }, [patient])
 
   const getChartData = (metric) => {
-    if (!Array.isArray(nurseRecords)) return [];
+    if (!Array.isArray(nurseRecords)) return []
     const data = nurseRecords
       .filter(record => record.structuredData && record.structuredData[metric])
       .map(record => ({
-        date: record.date,
+        date: record.created_at,
         value: metric === 'bloodPressure' 
           ? record.structuredData[metric]
           : parseFloat(record.structuredData[metric])
       }))
       .reverse() // Show oldest to newest
-    
     return data
   }
 
   const chartData = getChartData(selectedMetric)
 
+  // --- SimpleChart component remains exactly the same ---
   const SimpleChart = ({ data, metric }) => {
     if (data.length === 0) {
       return <div className="no-data">No data available for {metric}</div>
     }
 
-    // For blood pressure, we'll show just the text values
     if (metric === 'bloodPressure') {
       return (
         <div className="bp-chart">
@@ -39,7 +73,6 @@ const PatientTrends = ({ nurseRecords = [] }) => {
       )
     }
 
-    // For numeric values, create a simple line chart
     const values = data.map(d => d.value)
     const minValue = Math.min(...values)
     const maxValue = Math.max(...values)
@@ -68,12 +101,9 @@ const PatientTrends = ({ nurseRecords = [] }) => {
               </div>
             )
           })}
-          
-          {/* Connect points with lines */}
           <svg className="chart-lines">
             {data.map((point, index) => {
               if (index === 0) return null
-              
               const prevPoint = data[index - 1]
               const x1 = ((index - 1) / (data.length - 1 || 1)) * 100
               const y1 = ((prevPoint.value - minValue) / range) * 200 + 20
@@ -165,4 +195,4 @@ const PatientTrends = ({ nurseRecords = [] }) => {
   )
 }
 
-export default PatientTrends
+export default PatientTrends;

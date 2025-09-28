@@ -146,10 +146,15 @@ app.get("/nurse-records", async (req, res) => {
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
   const appointmentId = req.query.appointment;
+  const patient = req.query.patient;
 
   let query = supabase.from("nurse_records").select("*").order('created_at', { ascending: false });
   if (appointmentId) {
     query = query.eq("appointment", appointmentId);
+  }
+
+  if (patient) {
+    query = query.eq("patient", patient);
   }
 
   const { data, error } = await query;
@@ -163,7 +168,6 @@ app.post("/nurse-records", async (req, res) => {
 
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
-  const { data, error } = await supabase.auth.getUser()
 
   try {
     const { data, error } = await supabase
@@ -211,7 +215,19 @@ app.get("/doctor-records", async (req, res) => {
   const supabase = getSupabaseWithAuth(req);
   if (!supabase) return res.status(401).json({ error: "Unauthorized" });
 
-  const { data, error } = await supabase.from("doctor_records").select("*").order('created_at', { ascending: false });
+  const appointment = req.query.appointment;
+  const patient = req.query.patient;
+
+  let query = supabase.from("doctor_records").select("*").order('created_at', { ascending: false });
+  if (appointment) {
+    query = query.eq("appointment", appointment);
+  }
+
+  if (patient) {
+    query = query.eq("patient", patient);
+  }
+
+  const { data, error } = await query;
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
@@ -219,6 +235,10 @@ app.get("/doctor-records", async (req, res) => {
 });
 
 app.post("/doctor-records", async (req, res) => {
+
+  const supabase = getSupabaseWithAuth(req);
+  if (!supabase) return res.status(401).json({ error: "Unauthorized" });
+
 
   try {
     const { data, error } = await supabase
@@ -231,7 +251,7 @@ app.post("/doctor-records", async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ err: err.message || "Server error" });
   }
 });
 
