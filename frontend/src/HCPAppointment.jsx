@@ -23,6 +23,75 @@ function HCPAppointment() {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const token = localStorage.getItem("token");
 
+  // Add dummy visits for testing trends
+  const [dummyVisits, setDummyVisits] = useState([
+    {
+      id: 1,
+      patientId: 1,
+      date: "2025-01-15",
+      transcript: "Patient reports feeling well. Blood pressure is 120/80, weight is 150 pounds, heart rate is 72 bpm, temperature is 98.6 degrees.",
+      structuredData: {
+        bloodPressure: "120/80",
+        weight: 150,
+        heartRate: 72,
+        temperature: 98.6
+      },
+      recordedBy: "nurse"
+    },
+    {
+      id: 2,
+      patientId: 1,
+      date: "2025-02-15",
+      transcript: "Follow-up visit. Blood pressure improved to 118/78, weight down to 148 pounds, heart rate steady at 70 bpm, temperature normal at 98.4 degrees.",
+      structuredData: {
+        bloodPressure: "118/78",
+        weight: 148,
+        heartRate: 70,
+        temperature: 98.4
+      },
+      recordedBy: "nurse"
+    },
+    {
+      id: 3,
+      patientId: 1,
+      date: "2025-03-15",
+      transcript: "Regular checkup. Blood pressure stable at 115/75, weight continues to decrease at 145 pounds, heart rate is 68 bpm, temperature is 98.5 degrees.",
+      structuredData: {
+        bloodPressure: "115/75",
+        weight: 145,
+        heartRate: 68,
+        temperature: 98.5
+      },
+      recordedBy: "nurse"
+    },
+    {
+      id: 4,
+      patientId: 1,
+      date: "2025-04-15",
+      transcript: "Patient consultation with doctor. Discussing treatment plan and symptoms.",
+      structuredData: {
+        chiefComplaint: "Mild headaches",
+        presentIllness: "Patient reports occasional headaches for past 2 weeks",
+        symptoms: "Headaches, mild fatigue",
+        treatment: "Continue current medication, follow up in 4 weeks"
+      },
+      recordedBy: "doctor"
+    },
+    {
+      id: 5,
+      patientId: 1,
+      date: "2025-05-15",
+      transcript: "Latest vitals check. Blood pressure excellent at 112/72, weight maintained at 144 pounds, heart rate is 65 bpm, temperature normal at 98.3 degrees.",
+      structuredData: {
+        bloodPressure: "112/72",
+        weight: 144,
+        heartRate: 65,
+        temperature: 98.3
+      },
+      recordedBy: "nurse"
+    }
+  ]);
+
   // Fetch appointment data by id
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -35,16 +104,23 @@ function HCPAppointment() {
           // Set current patient info and visits
           setCurrentPatient({ id: data.patient.id, name: data.patient.name || "Unknown Patient" });
 
-          setVisits([
-            {
-              id: data.id,
-              patientId: data.patient,
-              date: data.date,
-              transcript: data.transcript || "",
-              structuredData: data.structured_data || {},
-              reason: data.reason,
-            },
-          ]);
+          // Combine real appointment data with dummy visits
+          const realVisit = {
+            id: data.id,
+            patientId: data.patient.id,
+            date: data.date,
+            transcript: data.transcript || "",
+            structuredData: data.structured_data || {},
+            reason: data.reason,
+          };
+
+          // Add dummy visits with the same patientId
+          const dummyVisitsForPatient = dummyVisits.map(visit => ({
+            ...visit,
+            patientId: data.patient.id
+          }));
+
+          setVisits([realVisit, ...dummyVisitsForPatient]);
         } else {
           console.error("Error fetching appointment:", data.error);
         }
@@ -56,18 +132,21 @@ function HCPAppointment() {
   }, [id]);
 
   useEffect(() => {
-    // Fetch nurse records for the current patient
-    const fetchNurseRecords = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/nurse-records?patientId=${currentPatient.id}`);
-        if (!res.ok) throw new Error('Failed to fetch nurse records');
-        const data = await res.json();
-        setNurseRecords(data);
-      } catch (err) {
-        console.error('Error fetching nurse records:', err);
-        setNurseRecords([]);
-      }
+    // Use only dummy nurse records for trending
+    const fetchNurseRecords = () => {
+      if (!currentPatient) return;
+      
+      // Use dummy data for trending
+      const dummyNurseRecords = dummyVisits
+        .filter(visit => visit.recordedBy === 'nurse')
+        .map(visit => ({
+          ...visit,
+          patientId: currentPatient.id
+        }));
+      
+      setNurseRecords(dummyNurseRecords);
     };
+    
     fetchNurseRecords();
   }, [currentPatient]);
 
@@ -200,19 +279,91 @@ Patient: Two days.
 }
 
 
-  const handleSaveVisit = () => {
+  const handleSaveVisit = async () => {
+    if (!currentPatient) return;
+
     const newVisit = {
-      id: visits.length + 1,
-      patientId: currentPatient.id,
-      date: new Date().toISOString().split("T")[0],
+      patient: currentPatient.id,
       transcript: transcript,
       structuredData: structuredData,
-      recordedBy: currentRole,
+      appointment: id, // tie visit to appointment
     };
 
+    // Update local state
     setVisits([newVisit, ...visits]);
     setTranscript("");
     setStructuredData({});
+
+    try {
+      // Check if nurse record exists for this appointment
+      const resCheck = await fetch(
+        `http://localhost:3000/nurse-records?appointment=${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const existingRecords = await resCheck.json();
+      const userId = localStorage.getItem("userId");
+      if (resCheck.ok && existingRecords.length > 0) {
+        // Record exists → update it
+        const recordId = existingRecords[0].id;
+        
+        const resUpdate = await fetch(`http://localhost:3000/nurse-records/${recordId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            transcript: newVisit.transcript,
+            height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
+            weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
+            blood_pressure: newVisit.structuredData.bloodPressure, // as text
+            heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
+            temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
+            appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
+            patient: currentPatient.id, 
+            hcp: userId
+          }),
+        });
+
+        if (!resUpdate.ok) {
+          const errData = await resUpdate.json();
+          console.error("Failed to update nurse record:", errData);
+        } else {
+          console.log("Nurse record updated successfully");
+        }
+      } else {
+        // Record does not exist → create new
+        const resCreate = await fetch("http://localhost:3000/nurse-records", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            transcript: newVisit.transcript,
+            height: newVisit.structuredData.height ? parseFloat(newVisit.structuredData.height) : null,
+            weight: newVisit.structuredData.weight ? parseFloat(newVisit.structuredData.weight) : null,
+            blood_pressure: newVisit.structuredData.bloodPressure, // as text
+            heart_rate: newVisit.structuredData.heartRate ? parseInt(newVisit.structuredData.heartRate) : null,
+            temperature: newVisit.structuredData.temperature ? parseFloat(newVisit.structuredData.temperature) : null,
+            appointment: parseInt(id), // keep as string UUID if your DB uses UUIDs
+            patient: currentPatient.id, 
+            hcp: userId
+          }),
+        });
+
+        if (!resCreate.ok) {
+          const errData = await resCreate.json();
+          console.error("Failed to create nurse record:", errData);
+        } else {
+          console.log("Nurse record created successfully");
+        }
+      }
+    } catch (err) {
+      console.error("Error saving nurse record:", err);
+    }
   };
 
   if (!currentPatient) return <div>Loading appointment...</div>;
@@ -253,15 +404,15 @@ Patient: Two days.
         </div>
         
         <div className="dashboard-section">
-          <PatientDashboard visits={visits.filter(v => v.patientId === currentPatient.id)} />
-          
+          <PatientDashboard nurseRecords={nurseRecords} />
         </div>
+        
         <div className='trends-section'>
-<PatientTrends visits={visits.filter(v => v.patientId === currentPatient.id)} />
+          <PatientTrends nurseRecords={nurseRecords} />
         </div>
       </div>
     </div>
   )
 }
 
-export default HCPAppointment
+export default HCPAppointment;

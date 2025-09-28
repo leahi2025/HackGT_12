@@ -436,6 +436,7 @@
 .visit-date {
   font-weight: bold;
   color: #495057;
+  padding-right: 20px;
 }
 
 .visit-id {
@@ -1744,49 +1745,70 @@
 @media (max-width: 480px) {
   .signup-card {
     padding: 25px 15px;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}  line-height: 1.5;  margin: 0 0 25px 0;  font-size: 1rem;  color: #5a6c7d;.error-card p {}  margin: 0 0 15px 0;  font-weight: 600;  font-size: 1.5rem;  color: #2c3e50;.error-card h3 {}  width: 100%;  max-width: 400px;  text-align: center;  border: 1px solid #e1e5e9;  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);  border-radius: 12px;  padding: 40px;  background: white;.error-card {}  padding: 40px 20px;  min-height: 300px;  align-items: center;  justify-content: center;  display: flex;.error-container {/* Error Container Styles */}  }    font-size: 1.6rem;  .signup-header h2 {    }  }
+  }
   
   .signup-header h2 {
     font-size: 1.6rem;
   }
+}
+
+/* Nurse Records List Styles */
+.nurseRecords-list {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 5px;
+  margin-right: -5px;
+}
+
+/* Custom scrollbar styling */
+.nurseRecords-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.nurseRecords-list::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.nurseRecords-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.nurseRecords-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+}
+
+/* Firefox scrollbar styling */
+.nurseRecords-list {
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f8f9fa;
+}
+
+/* Add subtle fade effect at top and bottom when scrolling */
+.nurseRecords-list {
+  position: relative;
+}
+
+.nurseRecords-list::before,
+.nurseRecords-list::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.nurseRecords-list::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+}
+
+.nurseRecords-list::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.8), transparent);
 }

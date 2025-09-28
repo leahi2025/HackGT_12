@@ -19,7 +19,7 @@ const PatientDashboard = ({ nurseRecords = [] }) => {
     <div className="patient-dashboard">
       <h2>Patient Dashboard</h2>
       
-      {latestVitals && (
+      {/* {latestVitals && (
         <div className="current-vitals">
           <h3>Latest Vitals</h3>
           <div className="vitals-grid">
@@ -52,19 +52,18 @@ const PatientDashboard = ({ nurseRecords = [] }) => {
             )}
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="visit-history">
       {nurseRecords.length === 0 ? (
         <p className="no-nurseRecords">No nurse records recorded yet.</p>
       ) : (
         <>
-          <h3>Recent nurseRecords ({nurseRecords.length})</h3>
           <div className="nurseRecords-list">
             {nurseRecords.map((visit) => (
               <div key={visit.id} className="visit-card">
                 <div className="visit-header">
-                  <div className="visit-date">{formatDate(visit.created_at)}</div>
+                  <div className="visit-date">{visit.date}</div>
                   <div className="visit-id">Visit #{visit.id}</div>
                 </div>
                 <div className="visit-content">
