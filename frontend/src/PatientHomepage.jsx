@@ -115,7 +115,7 @@ function PatientHomepage() {
         <ul>
           {upcomingAppointments.map((appt) => (
             <li key={appt.id}>
-              {appt.date} with {appt.hcp} — {appt.reason}
+              {new Date(appt.date).toLocaleString()} with {appt.hcp?.name || "Unknown"} — {appt.reason}
             </li>
           ))}
         </ul>
@@ -125,9 +125,9 @@ function PatientHomepage() {
       <section>
         <h2>Past Appointments</h2>
         <ul>
-          {pastAppointments.map((appt) => (
+          {upcomingAppointments.map((appt) => (
             <li key={appt.id}>
-              {appt.date} with {appt.hcp} — {appt.reason}
+              {new Date(appt.date).toLocaleString()} with {appt.hcp?.name || "Unknown"} — {appt.reason}
             </li>
           ))}
         </ul>

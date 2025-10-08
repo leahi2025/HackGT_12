@@ -349,13 +349,11 @@ app.patch("/appointments/:id", async (req, res) => {
     const { data, error: updateError } = await supabase
       .from("appointments")
       .update(updates)
-      .eq("id", id)
+      .eq("id", parseInt(id))
       .select()
       .single();
 
     if (updateError) return res.status(400).json({ error: updateError.message });
-
-    res.json(data);
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }

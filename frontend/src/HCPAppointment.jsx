@@ -23,112 +23,82 @@ function HCPAppointment() {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const token = localStorage.getItem("token");
 
-  // Add dummy visits for testing trends
-  const [dummyVisits, setDummyVisits] = useState([
-    {
-      id: 1,
-      patientId: 1,
-      date: "2025-01-15",
-      transcript: "Patient reports feeling well. Blood pressure is 120/80, weight is 150 pounds, heart rate is 72 bpm, temperature is 98.6 degrees.",
-      structuredData: {
-        bloodPressure: "120/80",
-        weight: 150,
-        heartRate: 72,
-        temperature: 98.6
-      },
-      recordedBy: "nurse"
-    },
-    {
-      id: 2,
-      patientId: 1,
-      date: "2025-02-15",
-      transcript: "Follow-up visit. Blood pressure improved to 118/78, weight down to 148 pounds, heart rate steady at 70 bpm, temperature normal at 98.4 degrees.",
-      structuredData: {
-        bloodPressure: "118/78",
-        weight: 148,
-        heartRate: 70,
-        temperature: 98.4
-      },
-      recordedBy: "nurse"
-    },
-    {
-      id: 3,
-      patientId: 1,
-      date: "2025-03-15",
-      transcript: "Regular checkup. Blood pressure stable at 115/75, weight continues to decrease at 145 pounds, heart rate is 68 bpm, temperature is 98.5 degrees.",
-      structuredData: {
-        bloodPressure: "115/75",
-        weight: 145,
-        heartRate: 68,
-        temperature: 98.5
-      },
-      recordedBy: "nurse"
-    },
-    {
-      id: 4,
-      patientId: 1,
-      date: "2025-04-15",
-      transcript: "Patient consultation with doctor. Discussing treatment plan and symptoms.",
-      structuredData: {
-        chiefComplaint: "Mild headaches",
-        presentIllness: "Patient reports occasional headaches for past 2 weeks",
-        symptoms: "Headaches, mild fatigue",
-        treatment: "Continue current medication, follow up in 4 weeks"
-      },
-      recordedBy: "doctor"
-    },
-    {
-      id: 5,
-      patientId: 1,
-      date: "2025-05-15",
-      transcript: "Latest vitals check. Blood pressure excellent at 112/72, weight maintained at 144 pounds, heart rate is 65 bpm, temperature normal at 98.3 degrees.",
-      structuredData: {
-        bloodPressure: "112/72",
-        weight: 144,
-        heartRate: 65,
-        temperature: 98.3
-      },
-      recordedBy: "nurse"
-    }
-  ]);
-
   // Fetch appointment data by id
   useEffect(() => {
-    const fetchAppointment = async () => {
+    const fetchAppointmentAndRecords = async () => {
       try {
+        // 1. Fetch appointment
         const res = await fetch(`http://localhost:3000/appointments/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (res.ok) {
-          // Set current patient info and visits
-          setCurrentPatient({ id: data.patient.id, name: data.patient.name || "Unknown Patient" });
-
-          // Combine real appointment data with dummy visits
-          const realVisit = {
-            id: data.id,
-            patientId: data.patient.id,
-            date: data.date,
-            transcript: data.transcript || "",
-            structuredData: data.structured_data || {},
-            reason: data.reason,
-          };
-
-          // Add dummy visits with the same patientId
-          const dummyVisitsForPatient = dummyVisits.map(visit => ({
-            ...visit,
-            patientId: data.patient.id
-          }));
-
-          setVisits([realVisit, ...dummyVisitsForPatient]);
-        } else {
+        if (!res.ok) {
           console.error("Error fetching appointment:", data.error);
+          return;
         }
+
+        setCurrentPatient({ 
+          id: data.patient.id, 
+          name: data.patient.name || "Unknown Patient" 
+        });
+
+        console.log(data.patient.id)
+
+        // 2. Fetch nurse records
+        const nurseRes = await fetch(`http://localhost:3000/nurse-records?patient=${data.patient.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const nurseData = await nurseRes.json();
+        console.log(nurseData);
+        const nurseVisits = (nurseData || []).map(nr => ({
+          id: nr.id,
+          patientId: nr.patient,
+          date: nr.created_at,
+          transcript: nr.transcript,
+          structuredData: {
+            bloodPressure: nr.blood_pressure,
+            height: nr.height,
+            weight: nr.weight,
+            heartRate: nr.heart_rate,
+            temperature: nr.temperature,
+          },
+          role: "nurse",
+        }));
+
+        // 3. Fetch doctor records
+        const doctorRes = await fetch(`http://localhost:3000/doctor-records?patient=${data.patient.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const doctorData = await doctorRes.json();
+        const doctorVisits = (doctorData || []).map(dr => ({
+          id: dr.id,
+          patientId: dr.patient,
+          date: dr.created_at,
+          transcript: dr.transcript,
+          structuredData: {
+            chiefComplaint: dr.chief_complaint,
+            presentIllness: dr.present_illness,
+            pastIllness: dr.past_illness,
+            symptoms: dr.symptoms,
+            treatment: dr.treatment,
+          },
+          role: "doctor",
+        }));
+
+        // 4. Merge and sort all visits
+        const combinedVisits = [...nurseVisits, ...doctorVisits]
+          .filter(v => v.date) // keep only visits with date
+          .sort((a, b) => new Date(b.date) - new Date(a.date)); // newest first
+
+        // 5. Set visits
+        setVisits(combinedVisits);
+
       } catch (err) {
         console.error("Fetch failed:", err);
       }
     };
-    fetchAppointment();
+
+    fetchAppointmentAndRecords();
   }, [id]);
 
   useEffect(() => {
@@ -148,21 +118,6 @@ function HCPAppointment() {
         setNurseRecords([]);
       }
     };
-    // Use only dummy nurse records for trending
-    const fetchNurseRecords = () => {
-      if (!currentPatient) return;
-      
-      // Use dummy data for trending
-      const dummyNurseRecords = dummyVisits
-        .filter(visit => visit.recordedBy === 'nurse')
-        .map(visit => ({
-          ...visit,
-          patientId: currentPatient.id
-        }));
-      
-      setNurseRecords(dummyNurseRecords);
-    };
-    
     fetchNurseRecords();
   }, [currentPatient]);
 
@@ -489,14 +444,12 @@ Patient: Two days.
         </div>
         
         <div className="dashboard-section">
-          <PatientDashboard nurseRecords={nurseRecords}/>
+          <PatientDashboard visits={visits}/>
           
-          <PatientDashboard nurseRecords={nurseRecords} />
         </div>
         
         <div className='trends-section'>
 <PatientTrends patient={currentPatient.id}/>
-          <PatientTrends nurseRecords={nurseRecords} />
         </div>
       </div>
     </div>

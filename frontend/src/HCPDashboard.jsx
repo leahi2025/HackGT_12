@@ -19,11 +19,25 @@ function HCPDashboard() {
       // If your backend only returns patient IDs, fetch their names
       const dataWithNames = await Promise.all(
         data.map(async (appt) => {
-          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const patientData = await patientRes.json();
-          return { ...appt, patientName: patientData.name };
+          // appt.patient may be an object { id, name } (when joined by the backend)
+          // or a scalar id (when not joined). Use the name if present to avoid
+          // an extra fetch.
+          const patientObj = appt.patient;
+          if (patientObj && typeof patientObj === 'object' && patientObj.name) {
+            return { ...appt, patientName: patientObj.name };
+          }
+
+          const patientId = (patientObj && patientObj.id) ? patientObj.id : patientObj;
+          try {
+            const patientRes = await fetch(`http://localhost:3000/patients/${patientId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const patientData = await patientRes.json();
+            return { ...appt, patientName: patientData.name };
+          } catch (fetchErr) {
+            console.warn('Failed to fetch patient for appointment', appt.id, fetchErr);
+            return { ...appt, patientName: 'Unknown' };
+          }
         })
       );
 
@@ -43,11 +57,22 @@ function HCPDashboard() {
 
       const dataWithNames = await Promise.all(
         data.map(async (appt) => {
-          const patientRes = await fetch(`http://localhost:3000/patients/${appt.patient.id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const patientData = await patientRes.json();
-          return { ...appt, patientName: patientData.name };
+          const patientObj = appt.patient;
+          if (patientObj && typeof patientObj === 'object' && patientObj.name) {
+            return { ...appt, patientName: patientObj.name };
+          }
+
+          const patientId = (patientObj && patientObj.id) ? patientObj.id : patientObj;
+          try {
+            const patientRes = await fetch(`http://localhost:3000/patients/${patientId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const patientData = await patientRes.json();
+            return { ...appt, patientName: patientData.name };
+          } catch (fetchErr) {
+            console.warn('Failed to fetch patient for appointment', appt.id, fetchErr);
+            return { ...appt, patientName: 'Unknown' };
+          }
         })
       );
 

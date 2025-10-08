@@ -1,108 +1,54 @@
-const PatientDashboard = ({ nurseRecords = [] }) => {
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+// PatientDashboard.jsx
 
-  const getLatestVitals = () => {
-    if (!Array.isArray(nurseRecords) || nurseRecords.length === 0) return null
-    const latestVisit = nurseRecords[0]
-    return latestVisit.structuredData
-  }
+const renderField = (label, value) => {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
 
-  const latestVitals = getLatestVitals()
+  let displayValue = value;
+  if (Array.isArray(value)) {
+    displayValue = value.join(", ");
+  }
 
   return (
-    <div className="patient-dashboard">
-      <h2>Patient Dashboard</h2>
-      
-      {/* {latestVitals && (
-        <div className="current-vitals">
-          <h3>Latest Vitals</h3>
-          <div className="vitals-grid">
-            {latestVitals.bloodPressure && (
-              <div className="vital-card">
-                <div className="vital-label">Blood Pressure</div>
-                <div className="vital-value">{latestVitals.bloodPressure}</div>
-              </div>
-            )}
-            
-            {latestVitals.weight && (
-              <div className="vital-card">
-                <div className="vital-label">Weight</div>
-                <div className="vital-value">{latestVitals.weight} lbs</div>
-              </div>
-            )}
-            
-            {latestVitals.heartRate && (
-              <div className="vital-card">
-                <div className="vital-label">Heart Rate</div>
-                <div className="vital-value">{latestVitals.heartRate} bpm</div>
-              </div>
-            )}
-            
-            {latestVitals.temperature && (
-              <div className="vital-card">
-                <div className="vital-label">Temperature</div>
-                <div className="vital-value">{latestVitals.temperature}°F</div>
-              </div>
-            )}
-          </div>
-        </div>
-      )} */}
+    <div>
+      <strong>{label}:</strong> {displayValue}
+    </div>
+  );
+};
 
-      <div className="visit-history">
-      {nurseRecords.length === 0 ? (
-        <p className="no-nurseRecords">No nurse records recorded yet.</p>
+export default function PatientDashboard({ visits }) {
+  return (
+    <div className="patient-dashboard">
+      <h2>Patient Visits</h2>
+      {visits.length === 0 ? (
+        <p>No visits recorded yet.</p>
       ) : (
-        <>
-          <div className="nurseRecords-list">
-            {nurseRecords.map((visit) => (
-              <div key={visit.id} className="visit-card">
-                <div className="visit-header">
-                  <div className="visit-date">{visit.date}</div>
-                  <div className="visit-id">Visit #{visit.id}</div>
-                </div>
-                <div className="visit-content">
-                  <div className="visit-transcript">
-                    <strong>Notes:</strong> {visit.transcript}
-                  </div>
-                  {visit.structuredData && Object.keys(visit.structuredData).length > 0 && (
-                    <div className="visit-vitals">
-                      <strong>Vitals:</strong>
-                      <div className="vitals-summary">
-                        {visit.structuredData.bloodPressure && (
-                          <span className="vital-item">BP: {visit.structuredData.bloodPressure}</span>
-                        )}
-                        {visit.structuredData.weight && (
-                          <span className="vital-item">Weight: {visit.structuredData.weight}lbs</span>
-                        )}
-                        {visit.structuredData.heartRate && (
-                          <span className="vital-item">HR: {visit.structuredData.heartRate}bpm</span>
-                        )}
-                        {visit.structuredData.temperature && (
-                          <span className="vital-item">Temp: {visit.structuredData.temperature}°F</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {visit.structuredData?.symptoms && visit.structuredData.symptoms.length > 0 && (
-                    <div className="visit-symptoms">
-                      <strong>Symptoms:</strong> {visit.structuredData.symptoms.join(', ')}
-                    </div>
-                  )}
-                </div>
+        visits.map((visit, index) => (
+          <div key={index} className="visit-card">
+            <div>
+              <strong>Date:</strong>{" "}
+              {visit.date ? new Date(visit.date).toLocaleDateString() : "—"}
+            </div>
+
+            {/* Structured data (works for nurse + doctor visits) */}
+            {visit.structuredData && (
+              <div className="structured-data">
+                {renderField("Blood Pressure", visit.structuredData.bloodPressure || visit.structuredData.blood_pressure)}
+                {renderField("Height", visit.structuredData.height)}
+                {renderField("Weight", visit.structuredData.weight)}
+                {renderField("Heart Rate", visit.structuredData.heartRate || visit.structuredData.heart_rate)}
+                {renderField("Temperature", visit.structuredData.temperature)}
+
+                {/* Doctor-specific fields */}
+                {renderField("Chief Complaint", visit.structuredData.chiefComplaint)}
+                {renderField("Present Illness", visit.structuredData.presentIllness)}
+                {renderField("Past Illness", visit.structuredData.pastIllness)}
+                {renderField("Symptoms", visit.structuredData.symptoms)}
+                {renderField("Treatment Plan", visit.structuredData.treatment)}
               </div>
-            ))}
+            )}
           </div>
-        </>
+        ))
       )}
     </div>
-  </div>
-  )
+  );
 }
-
-export default PatientDashboard
